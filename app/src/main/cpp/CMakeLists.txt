@@ -1,46 +1,57 @@
 cmake_minimum_required(VERSION 3.20)
-project(PotraceCppProject)
+project(DrawingApp)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# ---------------------------
 # Include directories
+# ---------------------------
 include_directories(
-    ${CMAKE_SOURCE_DIR}           # for bitmap.h, main.cpp
-    ${CMAKE_SOURCE_DIR}/potrace   # for potracelib.h, config.h, etc
+		${CMAKE_SOURCE_DIR}           # for native-lib.cpp, img_to_code.cpp, preprocess.cpp
+		${CMAKE_SOURCE_DIR}/potrace   # for potrace headers
+		${CMAKE_SOURCE_DIR}/opencv/include  # OpenCV headers (opencv2/ folder is inside)
 )
 
-# Get all .c files in potrace directory
+# ---------------------------
+# Collect source files
+# ---------------------------
 file(GLOB POTRACE_SOURCES "${CMAKE_SOURCE_DIR}/potrace/*.c")
 
-# All source files for project
 set(SOURCES
-        main.cpp
-        preprocess.cpp
-        img_to_code.cpp
-    ${POTRACE_SOURCES}
+		native-lib.cpp
+		img_to_code.cpp
+		preprocess.cpp
+		${POTRACE_SOURCES}
 )
 
-# --- OpenCV ---
-set(OpenCV_DIR "C:/Users/natan/Documents/OpenCV-android-sdk/sdk/native/jni")
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-
-# --- Creates Executable ---
-# Create executable
+# ---------------------------
+# Create native library
+# ---------------------------
 add_library(
-	native-lib
-	SHARED
-	${SOURCES}
+		native-lib
+		SHARED
+		${SOURCES}
 )
 
-find_library(
-	log-lib
-	log
+# ---------------------------
+# Android log library
+# ---------------------------
+find_library(log-lib log)
+
+# ---------------------------
+# Prebuilt OpenCV library
+# ---------------------------
+add_library(opencv_java4 SHARED IMPORTED)
+set_target_properties(opencv_java4 PROPERTIES
+		IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libopencv_java4.so
 )
 
+# ---------------------------
+# Link libraries
+# ---------------------------
 target_link_libraries(
-	native-lib
-    ${OpenCV_LIBS}
-    ${log-lib}
+		native-lib
+		${log-lib}
+		opencv_java4
 )
