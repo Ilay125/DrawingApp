@@ -16,7 +16,7 @@ include_directories(
 # ---------------------------
 # Collect source files
 # ---------------------------
-file(GLOB POTRACE_SOURCES "${CMAKE_SOURCE_DIR}/potrace/*.c")
+file(GLOB POTRACE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/potrace/*.c")
 
 set(SOURCES
 		native-lib.cpp

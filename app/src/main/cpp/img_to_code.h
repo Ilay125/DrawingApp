@@ -6,14 +6,14 @@
 #include <iostream>
 
 extern "C" {
-    #include "potrace/potracelib.h"
-    #include "potrace/backend_svg.h"  
+#include "potrace/potracelib.h"
+#include "potrace/backend_code.h"
 }
 
 // #include "potrace/main.h"
 
 
-int png2svg(const std::string src, const std::string dst, const int thresh);
-void write_svg_info(imginfo_t& img_info, const potrace_bitmap_t& bmp);
+int png2code(const std::string src, const int thresh, unsigned char* buffer, int buf_size);
+//void write_svg_info(imginfo_t& img_info, const potrace_bitmap_t& bmp);
 
 #endif

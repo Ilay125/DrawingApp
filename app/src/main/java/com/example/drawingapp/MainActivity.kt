@@ -30,6 +30,9 @@ import com.example.drawingapp.ui.theme.DrawingAppTheme
 import java.io.File
 import java.io.InputStream
 
+private const val BUF_SIZE = 867
+
+
 fun uriToFilePath(context: Context, uri: Uri): String? {
     var path: String? = null
     val projection = arrayOf(MediaStore.Images.Media.DATA)
@@ -43,29 +46,9 @@ fun uriToFilePath(context: Context, uri: Uri): String? {
     return path
 }
 
-fun createSvgFileInDocuments(context: Context, filename: String): File {
-    val documentsDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        // Scoped storage: use app Documents dir
-        context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-    } else {
-        // Legacy external directory
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-    }
-
-    if (documentsDir != null && !documentsDir.exists()) documentsDir.mkdirs()
-
-    val file = File(documentsDir, filename)
-    if (!file.exists()) file.createNewFile()
-
-    // Make sure file appears in Files/My Files
-    MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), null, null)
-
-    return file
-}
-
 
 @Composable
-fun UploadPhotoScreen(img2code: (String, String, Int) -> Int) {
+fun UploadPhotoScreen(img2code: (String, Int, ByteArray, Int) -> Int) {
     var imageUri by remember { mutableStateOf<android.net.Uri?>(null) }
     var resultText by remember { mutableStateOf("") }
 
@@ -88,16 +71,18 @@ fun UploadPhotoScreen(img2code: (String, String, Int) -> Int) {
         val inputPath = uri?.let { uriToFilePath(context, it) }
 
         if (inputPath != null) {
-            // Save directly to native Documents folder
-            val outputFile = createSvgFileInDocuments(context, "output.svg")
-            val outputPath = outputFile.absolutePath
 
             val threshVal = 128 // example threshold
-            val result = img2code(inputPath, outputPath, threshVal)
-            resultText = "C++ result: $result\nOutput saved at $outputPath"
-            resultText = "C++ result: $result\nOutput saved at:\n$outputPath"
-            Toast.makeText(context, "Saved to Documents/output.svg", Toast.LENGTH_LONG).show()
-            Log.d("UploadPhotoScreen", resultText)
+            val buffer = ByteArray(BUF_SIZE)                  // allocate buffer
+            val ret = img2code(inputPath, threshVal, buffer, BUF_SIZE)
+
+            if (ret == 1) {
+                resultText = "Could not convert to points"
+            } else {
+                // Convert buffer to comma-separated ASCII integers
+                resultText = buffer.joinToString(separator = ",") { (it.toInt() and 0xFF).toString() }
+            }
+
         } else {
             resultText = "Could not resolve image path"
         }
@@ -151,7 +136,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // Declare the external function
-    external fun img2code(inputPath: String, outputPath: String, threshVal: Int): Int
+    external fun img2code(inputPath: String, threshVal: Int, buffer: ByteArray, bufSize: Int): Int
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -160,10 +145,16 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                )
-                {
-                    UploadPhotoScreen { inputPath, outputPath, threshVal ->
-                        img2code(inputPath, outputPath, threshVal)
+                ) {
+                    UploadPhotoScreen { inputPath, threshVal, buffer, bufSize ->
+                        val result = img2code(inputPath, threshVal, buffer, bufSize)
+
+                        val outputString = buffer.decodeToString().substringBefore('\u0000')
+
+                        Log.d("MainActivity", "C++ result: $result")
+                        Log.d("MainActivity", "Output string: $outputString")
+
+                        result
                     }
                 }
             }

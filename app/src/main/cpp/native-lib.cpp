@@ -7,24 +7,29 @@ Java_com_example_drawingapp_MainActivity_img2code(
         JNIEnv* env,
         jobject /* this */,
         jstring inputPath,
-        jstring outputPath,
-        jint thresh_val) {
+        jint thresh_val,
+        jbyteArray buffer,
+        jint buf_size) {
 
     // Convert jstring → std::string
     const char* inputCStr = env->GetStringUTFChars(inputPath, nullptr);
-    const char* outputCStr = env->GetStringUTFChars(outputPath, nullptr);
 
     const int threshCInt = static_cast<int>(thresh_val);
 
     std::string input(inputCStr);
-    std::string output(outputCStr);
+
+    jbyte* buf_ptr = env->GetByteArrayElements(buffer, nullptr);
+
+    unsigned char* cbuffer = reinterpret_cast<unsigned char*>(buf_ptr);
+    const int buf_size_cint = static_cast<int>(buf_size);
+
 
     // Call your actual C++ function
-    int result = png2svg(input, output, threshCInt);
+    int result = png2code(input, threshCInt, cbuffer, buf_size_cint);
 
-    // Release memory for jstring
+    // Release memory for jstring and buffer
     env->ReleaseStringUTFChars(inputPath, inputCStr);
-    env->ReleaseStringUTFChars(outputPath, outputCStr);
+    env->ReleaseByteArrayElements(buffer, buf_ptr, 0);
 
     // Return the result as a new jstring
     return static_cast<jint>(result);

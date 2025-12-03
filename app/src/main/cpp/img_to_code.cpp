@@ -4,16 +4,9 @@
 #include "img_to_code.h"
 
 
+// SVG INFO - REDUNDENT
+/*
 void write_svg_info(imginfo_t& imginfo, const potrace_bitmap_t& bmp) {
-    /*
-    // svg data
-    info.opaque = 0;       // outline only, no fill
-    info.color = 0x000000; // stroke color black
-    info.unit = 10.0;       // coordinate unit
-    info.angle = 0;
-    info.grouping = 0;     // flat paths
-    info.fillcolor = 0; // unused
-    */
 
     imginfo.pixwidth = bmp.w;
     imginfo.pixheight = bmp.h;
@@ -33,9 +26,10 @@ void write_svg_info(imginfo_t& imginfo, const potrace_bitmap_t& bmp) {
 
 
 }
+*/
 
-int png2svg(const std::string src, const std::string dst, const int thresh) {
-     cv::Mat img;
+int png2code(const std::string src, const int thresh, unsigned char* buffer, int buf_size) {
+    cv::Mat img;
     if (open_img(src.c_str(), img)) {
         std::cerr << "No image was found in path: "+src << std::endl;
         return 1;
@@ -57,28 +51,21 @@ int png2svg(const std::string src, const std::string dst, const int thresh) {
         return 1;
     }
 
-    // Open SVG file for writing
-    FILE *svg_file = std::fopen(dst.c_str(), "w");
-    if (!svg_file) {
-        std::fprintf(stderr, "Cannot open output.svg for writing\n");
-        potrace_state_free(state);
-        potrace_param_free(param);
-        return 1;
-    }
-
     // --- Configure per-image info ---
-    imginfo_t imginfo = {};
+    //imginfo_t imginfo = {};
 
-    write_svg_info(imginfo, bmp);
+    //write_svg_info(imginfo, bmp);
 
     // Write SVG
-    my_page_svg(svg_file, state->plist, &imginfo);
+    //my_page_svg(svg_file, state->plist, &imginfo);
+
+    int err_code = draw_code(buffer, buf_size, state->plist);
 
     // Clean up
     potrace_state_free(state);
     potrace_param_free(param);
-    std::fclose(svg_file);   
+    //std::fclose(svg_file);
 
-    return 0;
+    return err_code;
 }
 

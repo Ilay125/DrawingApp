@@ -2,20 +2,22 @@
 #include <string>
 #include <iostream>
 
-
 #include "img_to_code.h"
 
+#define BUF_SIZE 867
 
 int main() {
     std::string src = "nerd.png";
-    std::string dst = "nerd_out.svg";
 
-    int thresh = 100;
+    int thresh = 128;
+    unsigned char buffer[BUF_SIZE] = { 0 };
 
-    if(png2svg(src, dst, thresh)) {
-        std::cout << "An error occured." << std::endl;
+    if(png2code(src, thresh, buffer, BUF_SIZE)) {
+        std::cout << "An error occured!!!" << std::endl;
     } else {
-        std::cout << "Managed to write svg file." << std::endl;
+        for (int c : buffer) {
+            printf("%d ", c);
+        }
     }
 
     return 0;
