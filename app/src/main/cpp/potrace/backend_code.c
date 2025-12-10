@@ -36,13 +36,14 @@ void get_border_vals(potrace_path_t* plist, double* min_x, double* min_y, double
         potrace_curve_t* curve = &p->curve;
 
         for (int i = 0; i < curve->n; i++) {
-            int points;
+            int points = 0;
             if (i == 0) { // starting point of the subpath
                 points = 1;
             } else if (curve->tag[i] == POTRACE_CURVETO) {
                 points = 3;
             } else if (curve->tag[i] == POTRACE_CORNER) {
-                points = 2;
+                // points = 2;
+                points = 1;
             }
 
             for (int j = 0; j < points; j++) {
@@ -144,8 +145,11 @@ int draw_code(unsigned char* sout, size_t sout_size, potrace_path_t* plist) {
                 sout[INC_IDX] = 'L';
                 sout[INC_IDX] = cvt_coords(curve->c[i][1].x, min_x, scale);
                 sout[INC_IDX] = cvt_coords(curve->c[i][1].y, min_y, scale);
+
+                /*
                 sout[INC_IDX] = cvt_coords(curve->c[i][2].x, min_x, scale);
                 sout[INC_IDX] = cvt_coords(curve->c[i][2].y, min_y, scale);
+                */
 
             }
         }
