@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- match tags that support NDEF (if they do) -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <tech-list>
         <tech>android.nfc.tech.Ndef</tech>
-    </tech-list>
-
-    <!-- NTAG family commonly exposes NfcA + MifareUltralight -->
-    <tech-list>
-        <tech>android.nfc.tech.MifareUltralight</tech>
-        <tech>android.nfc.tech.NfcA</tech>
-    </tech-list>
-
-    <!-- fallback: tag exposes only NfcA -->
-    <tech-list>
-        <tech>android.nfc.tech.NfcA</tech>
     </tech-list>
 </resources>

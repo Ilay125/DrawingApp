@@ -96,7 +96,7 @@ unsigned char cvt_coords(double x, double offset, double scale) {
 
 //int draw_code(char* sout, size_t sout_size, potrace_path_t* plist, imginfo_t* imginfo)
 int draw_code(unsigned char* sout, size_t sout_size, potrace_path_t* plist) {
-    if (!sout || !plist) return 1;
+    if (!sout || !plist) return 0;
 
     int idx = 0;
     int err_flag = 0;
@@ -124,13 +124,13 @@ int draw_code(unsigned char* sout, size_t sout_size, potrace_path_t* plist) {
         sout[INC_IDX] = cvt_coords(y0, min_y, scale);
 
         if (err_flag) {
-            return 1;
+            return 0;
         }
 
         // Draw segments
         for (int i = 0; i < curve->n; i++) {
             if (err_flag) {
-                return 1;
+                return 0;
             }
 
             if (curve->tag[i] == POTRACE_CURVETO) {
@@ -157,9 +157,9 @@ int draw_code(unsigned char* sout, size_t sout_size, potrace_path_t* plist) {
         sout[INC_IDX] = 'Z';
 
         if (err_flag) {
-            return 1;
+            return 0;
         }
     }
 
-    return err_flag;
+    return idx;
 }
